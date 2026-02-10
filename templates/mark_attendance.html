@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mark Attendance</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+
+    <h2>Mark / Modify Attendance</h2>
+    <p>Select your assigned class and the date to load the student list.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, msg in messages %}
+                <div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="get" action="{{ url_for('teacher.mark_attendance_route') }}" class="row g-3 mb-4 p-3 border rounded bg-white shadow-sm">
+        <div class="col-md-5">
+            <label class="form-label">Class/Subject</label>
+            <select name="alloc_id" class="form-select" required>
+                <option value="">-- Select your class --</option>
+                {% for subject in teacher_subjects %}
+                <option value="{{ subject.alloc_id }}" {% if selected_alloc_id == subject.alloc_id|string %}selected{% endif %}>
+                    Year {{ subject.year }} (Sem {{ subject.semester }}) - Sec {{ subject.section }} [{{ subject.subject_code }}]
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Date</label>
+            <input type="date" name="date" class="form-control" value="{{ selected_date }}" required>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Load Students</button>
+        </div>
+    </form>
+
+    {% if students %}
+    <h3 class="mt-4">
+        Class: Year {{ selected_allocation.year }} (Sem {{ selected_allocation.semester }}) - Sec {{ selected_allocation.section }} 
+        <small class="text-muted">({{ selected_allocation.subject_code }}) on {{ selected_date }}</small>
+    </h3>
+    <form method="post" action="{{ url_for('teacher.save_attendance_route') }}">
+       
+        <input type="hidden" name="subject_id" value="{{ selected_subject_id }}">
+        <input type="hidden" name="date" value="{{ selected_date }}">
+        <input type="hidden" name="alloc_id" value="{{ selected_alloc_id }}">
+
+        <table class="table table-bordered table-hover bg-white shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>MIS No</th>
+                    <th>Name</th>
+                    <th class="text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.mis_no }}</td>
+                    <td>{{ student.name }}</td>
+                    <td class="text-center">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" 
+                                   name="status_{{ student.mis_no }}" id="status_present_{{ student.mis_no }}" 
+                                   value="Present" {% if student.status == 'Present' %}checked{% endif %} required>
+                            <label class="form-check-label" for="status_present_{{ student.mis_no }}">Present</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" 
+                                   name="status_{{ student.mis_no }}" id="status_absent_{{ student.mis_no }}" 
+                                   value="Absent" {% if student.status == 'Absent' %}checked{% endif %} required>
+                            <label class="form-check-label" for="status_absent_{{ student.mis_no }}">Absent</label>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="text-end">
+            <button type="submit" class="btn btn-success btn-lg">Save / Update Attendance</button>
+        </div>
+    </form>
+    {% elif selected_alloc_id %}
+    <p class="alert alert-warning">No students found for this class. Ensure students are added with the correct Year/Semester/Section.</p>
+    {% endif %}
+
+    <a href="{{ url_for('teacher.teacher_dashboard') }}" class="btn btn-secondary mt-3 mb-5">Back to Dashboard</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { display: flex; min-height: 100vh; font-family: Arial, sans-serif; margin: 0; }
+        #sidebar { width: 250px; background: #343a40; color: white; }
+        #sidebar a { color: white; text-decoration: none; display: block; padding: 12px 20px; }
+        #sidebar a:hover { background: #495057; }
+        #main { flex: 1; padding: 30px; background: #f8f9fa; }
+        h2, h3 { margin-top: 0; }
+        .card { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h3 class="p-3">Teacher Panel</h3>
+        <p class="text-center" style="margin-bottom: 20px;">
+            <strong>{{ session.get('teacher_name', 'Teacher') }}</strong>
+        </p>
+        <a href="{{ url_for('teacher.teacher_dashboard') }}">📊 Dashboard</a>
+        <a href="{{ url_for('teacher.mark_attendance_route') }}">📝 Mark Attendance</a>
+        <a href="{{ url_for('teacher.view_reports') }}">📄 View Reports</a>
+        <a href="{{ url_for('teacher.teacher_change_password') }}">🔒 Change Password</a>
+        <a href="{{ url_for('auth.logout') }}">🚪 Logout</a>
+    </div>
+
+    <div id="main">
+        <h2>👋 Welcome, {{ session.get('teacher_name', 'Teacher') }}!</h2>
+        <p class="lead">You can mark attendance, view reports, and manage your account using the sidebar links.</p>
+        <hr>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">📋 Attendance</h5>
+                        <p class="card-text">Mark attendance quickly for your classes to keep records up-to-date.</p>
+                        <a href="{{ url_for('teacher.mark_attendance_route') }}" class="btn btn-primary btn-sm">Mark Attendance</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">📊 Reports</h5>
+                        <p class="card-text">View attendance reports for your students and download them for records.</p>
+                        <a href="{{ url_for('teacher.view_reports') }}" class="btn btn-success btn-sm">View Reports</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">⚙️ Account Settings</h5>
+                        <p class="card-text">Change your password or logout securely when finished.</p>
+                        <a href="{{ url_for('teacher.teacher_change_password') }}" class="btn btn-secondary btn-sm">Change Password</a>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

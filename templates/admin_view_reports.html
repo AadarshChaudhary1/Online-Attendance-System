@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Reports (Admin)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <h2>View Class Reports (Admin)</h2>
+    <p>Select a class and subject to view the attendance report.</p>
+    <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary mb-3">Back to Dashboard</a>
+    <hr>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="row g-3 mb-4 p-3 border rounded bg-white shadow-sm">
+        <div class="col-md-3">
+            <label class="form-label">Year</label>
+            <select name="year" class="form-select" required>
+                <option value="">-- Year --</option>
+                {% for y in years %}<option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-md-2">
+            <label class="form-label">Semester</label>
+            <select name="semester" class="form-select" required>
+                <option value="">-- Semester --</option>
+                <option value="1">Sem 1</option>
+                <option value="2">Sem 2</option>
+                <option value="3">Sem 3</option>
+                <option value="4">Sem 4</option>
+                <option value="5">Sem 5</option>
+                <option value="6">Sem 6</option>
+                <option value="7">Sem 7</option>
+                <option value="8">Sem 8</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Section</label>
+            <select name="section" class="form-select" required>
+                <option value="">-- Section --</option>
+                {% for s in sections %}<option value="{{ s }}" {% if s == section %}selected{% endif %}>{{ s }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Subject</label>
+            <select name="subject_id" class="form-select" required>
+                <option value="">-- Subject --</option>
+                {% for s in all_subjects %}
+                <option value="{{ s.subject_id }}" {% if s.subject_id|string == subject_id %}selected{% endif %}>
+                    {{ s.subject_code }} - {{ s.subject_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2 align-self-end">
+            <button type="submit" class="btn btn-primary w-100">View</button>
+        </div>
+    </form>
+
+    {% if reports %}
+    <h3 class="mt-4">Report Details</h3>
+    <div class="alert alert-info">
+        <strong>Total Classes Held: {{ total_classes }}</strong>
+    </div>
+
+    <div class="mb-3 d-flex gap-2">
+        <form method="POST" action="{{ url_for('admin.download_all_reports', file_type='csv') }}">
+            <input type="hidden" name="year" value="{{ year }}">
+            <input type="hidden" name="semester" value="{{ request.form.get('semester') }}">
+            <input type="hidden" name="section" value="{{ section }}">
+            <input type="hidden" name="subject_id" value="{{ subject_id }}">
+            <button type="submit" class="btn btn-success">⬇️ CSV</button>
+        </form>
+        <form method="POST" action="{{ url_for('admin.download_all_reports', file_type='xlsx') }}">
+            <input type="hidden" name="year" value="{{ year }}">
+            <input type="hidden" name="semester" value="{{ request.form.get('semester') }}">
+            <input type="hidden" name="section" value="{{ section }}">
+            <input type="hidden" name="subject_id" value="{{ subject_id }}">
+            <button type="submit" class="btn btn-info text-white">⬇️ Excel</button>
+        </form>
+        <form method="POST" action="{{ url_for('admin.download_all_reports', file_type='pdf') }}">
+            <input type="hidden" name="year" value="{{ year }}">
+            <input type="hidden" name="semester" value="{{ request.form.get('semester') }}">
+            <input type="hidden" name="section" value="{{ section }}">
+            <input type="hidden" name="subject_id" value="{{ subject_id }}">
+            <button type="submit" class="btn btn-danger">⬇️ PDF</button>
+        </form>
+    </div>
+
+    <table class="table table-bordered table-striped table-hover bg-white shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>MIS Number</th>
+                <th>Name</th>
+                <th>Classes Attended</th>
+                <th>Total Classes</th>
+                <th>Attendance %</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mis_no, name, attended, total, percent in reports %}
+            <tr class{% if percent < 75 %}"table-danger"{% elif percent < 90 %}"table-warning"{% endif %}>
+                <td>{{ mis_no }}</td>
+                <td>{{ name }}</td>
+                <td>{{ attended }}</td>
+                <td>{{ total }}</td>
+                <td>{{ percent }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% elif request.method == "POST" %}
+        <div class="alert alert-warning text-center">
+            No reports found for this selection.
+        </div>
+    {% endif %}
+
+</div>
+</body>
+</html>
